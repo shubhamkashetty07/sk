@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Suspicious Login Detection Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    .app {
+      max-width: 420px;
+      margin: 60px auto;
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-size: 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 6px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 15px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1e4fd8;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .normal {
+      background: #e6f7ed;
+      color: #065f46;
+      border: 1px solid #34d399;
+    }
+
+    .suspicious {
+      background: #fee2e2;
+      color: #7f1d1d;
+      border: 1px solid #f87171;
+    }
+
+    .error {
+      background: #fff7ed;
+      color: #7c2d12;
+      border: 1px solid #fb923c;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Login Attempt Analyzer</h1>
+
+    <label for="username">Username</label>
+    <input id="username" type="text" />
+
+    <label for="attempts">Failed Login Attempts</label>
+    <input id="attempts" type="number" min="0" />
+
+    <label for="interval">Time Interval (minutes)</label>
+    <input id="interval" type="number" min="0" />
+
+    <button id="checkBtn">Analyze</button>
+
+    <div id="output"></div>
+  </div>
+
+  <script>
+    (function () {
+      const usernameInput = document.getElementById("username");
+      const attemptsInput = document.getElementById("attempts");
+      const intervalInput = document.getElementById("interval");
+      const output = document.getElementById("output");
+      const checkBtn = document.getElementById("checkBtn");
+
+      function clearOutput() {
+        output.innerHTML = "";
+      }
+
+      function showResult(type, message) {
+        const div = document.createElement("div");
+        div.className = "result " + type;
+        div.textContent = message;
+        output.appendChild(div);
+      }
+
+      function analyzeLogin(username, attempts, interval) {
+        // Core rule:
+        // Suspicious if failed attempts > 3 AND time interval <= 5 minutes
+        if (attempts > 3 && interval <= 5) {
+          return {
+            status: "suspicious",
+            explanation:
+              "Suspicious login detected: More than 3 failed attempts occurred within 5 minutes."
+          };
+        }
+
+        return {
+          status: "normal",
+          explanation:
+            "Login activity appears normal: Failed attempts do not exceed the suspicious threshold."
+        };
+      }
+
+      checkBtn.addEventListener("click", function () {
+        clearOutput();
+
+        const username = usernameInput.value.trim();
+        const attempts = Number(attemptsInput.value);
+        const interval = Number(intervalInput.value);
+
+        // Basic validation for implied edge cases
+        if (!username) {
+          showResult("error", "Username is required.");
+          return;
+        }
+
+        if (!Number.isFinite(attempts) || attempts < 0) {
+          showResult("error", "Failed attempts must be a non-negative number.");
+          return;
+        }
+
+        if (!Number.isFinite(interval) || interval < 0) {
+          showResult("error", "Time interval must be a non-negative number.");
+          return;
+        }
+
+        const result = analyzeLogin(username, attempts, interval);
+
+        showResult(
+          result.status,
+          "User: " + username + " — " + result.explanation
+        );
+      });
+    })();
+  </script>
+</body>
+</html>
